@@ -1,6 +1,7 @@
 package cz.gov.data.rpp.xls2rdf;
 
 import cz.gov.data.rpp.xls2rdf.model.Agenda;
+import cz.gov.data.rpp.xls2rdf.model.utils.Registry;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;

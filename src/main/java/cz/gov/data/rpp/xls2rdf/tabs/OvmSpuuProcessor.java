@@ -7,6 +7,7 @@ import cz.gov.data.rpp.xls2rdf.model.KategorieOvm;
 import cz.gov.data.rpp.xls2rdf.model.KategorieSpuu;
 import cz.gov.data.rpp.xls2rdf.model.Ovm;
 import cz.gov.data.rpp.xls2rdf.model.Spuu;
+import cz.gov.data.rpp.xls2rdf.model.utils.Registry;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 
@@ -20,10 +21,10 @@ public class OvmSpuuProcessor implements TabProcessor {
     }
 
     private void processSingleKategorieOVM(final XSSFRow row, final Agenda agenda) {
-        final KategorieOvm typAgenta = new KategorieOvm();
-        typAgenta.setIdentifikace(row.getCell(0).toString());
+        final String identifikace = row.getCell(0).toString();
+        final KategorieOvm typAgenta = Registry.get(KategorieOvm.class,Vocabulary.getClassInstance(Vocabulary.KATEGORIE_ORGANU_VEREJNE_MOCI,identifikace));
+        typAgenta.setIdentifikace(identifikace);
         typAgenta.setNazev(row.getCell(1).toString());
-        typAgenta.setId(Vocabulary.getClassInstance(Vocabulary.KATEGORIE_ORGANU_VEREJNE_MOCI,typAgenta.getIdentifikace()));
         agenda.getKategorieVykonavatele().add(typAgenta);
     }
 
@@ -35,17 +36,10 @@ public class OvmSpuuProcessor implements TabProcessor {
     }
 
     private void processSingleOVM(final XSSFRow row, final Agenda agenda) {
-        final Ovm agent;
-        //        if (row.getCell(0).toString().equals( agenda.getOhlasovatel().getIdentifikace()
-        // )) {
-        //            agent = agenda.getOhlasovatel();
-        //        } else {
-        agent = new Ovm();
-        agent.setIdentifikace(row.getCell(0).toString());
+        final String identifikace = row.getCell(0).toString();
+        final Ovm agent = Registry.get(Ovm.class,Vocabulary.getClassInstance(Vocabulary.ORGAN_VEREJNE_MOCI,identifikace));
+        agent.setIdentifikace(identifikace);
         agent.setNazev(row.getCell(1).toString());
-        agent.setId(Vocabulary.getClassInstance(Vocabulary.ORGAN_VEREJNE_MOCI, agent.getIdentifikace()));
-        //        }
-
         agenda.getVykonavatele().add(agent);
     }
 
@@ -56,11 +50,10 @@ public class OvmSpuuProcessor implements TabProcessor {
     }
 
     private void processSingleKategorieSPUU(final XSSFRow row, final Agenda agenda) {
-        final KategorieSpuu typAgenta = new KategorieSpuu();
-        typAgenta.setIdentifikace(row.getCell(0).toString());
+        final String identifikace = row.getCell(0).toString();
+        final KategorieSpuu typAgenta = Registry.get(KategorieSpuu.class,Vocabulary.getClassInstance(Vocabulary.KATEGORIE_SOUKROMOPRAVNIHO_UZIVATELE_UDAJU,identifikace));
+        typAgenta.setIdentifikace(identifikace);
         typAgenta.setNazev(row.getCell(1).toString());
-        typAgenta.setId(Vocabulary.getClassInstance(Vocabulary.KATEGORIE_SOUKROMOPRAVNIHO_UZIVATELE_UDAJU, typAgenta
-            .getIdentifikace()));
         agenda.getKategorieVykonavatele().add(typAgenta);
     }
 
@@ -72,10 +65,10 @@ public class OvmSpuuProcessor implements TabProcessor {
     }
 
     private void processSingleSPUU(final XSSFRow row, final Agenda agenda) {
-        final Spuu agent = new Spuu();
-        agent.setIdentifikace(row.getCell(0).toString());
+        final String identifikace = row.getCell(0).toString();
+        final Spuu agent = Registry.get(Spuu.class,Vocabulary.getClassInstance(Vocabulary.SOUKROMOPRAVNI_UZIVATEL_UDAJU,identifikace));
+        agent.setIdentifikace(identifikace);
         agent.setNazev(row.getCell(1).toString());
-        agent.setId(Vocabulary.getClassInstance(Vocabulary.SOUKROMOPRAVNI_UZIVATEL_UDAJU, agent.getIdentifikace()));
         agenda.getVykonavatele().add(agent);
     }
 

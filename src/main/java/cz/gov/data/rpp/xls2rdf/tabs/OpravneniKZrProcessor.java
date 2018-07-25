@@ -16,6 +16,7 @@ import cz.gov.data.rpp.xls2rdf.model.Ovm;
 import cz.gov.data.rpp.xls2rdf.model.Spuu;
 import cz.gov.data.rpp.xls2rdf.model.TypAgenta;
 import cz.gov.data.rpp.xls2rdf.model.Udaj;
+import cz.gov.data.rpp.xls2rdf.model.utils.Registry;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
@@ -53,9 +54,9 @@ public class OpravneniKZrProcessor implements TabProcessor {
         final String agendaTo = matcher.group(2);
         final String opravneniNr = matcher.group(3);
 
-        final OpravneniKUdajum opravneni = new OpravneniKUdajum();
-        opravneni.setKod(agendaFrom + "-" + agendaTo + "-" + opravneniNr);
-        opravneni.setId(Vocabulary.getClassInstance(Vocabulary.OPRAVNENI_K_UDAJU,opravneni.getKod()));
+        String kod = agendaFrom + "-" + agendaTo + "-" + opravneniNr;
+        final OpravneniKUdajum opravneni = Registry.get(OpravneniKUdajum.class, Vocabulary.getClassInstance(Vocabulary.OPRAVNENI_K_UDAJU, kod));
+        opravneni.setKod(kod);
         agenda.getOpravneni().add(opravneni);
 
         row = row + 1;
@@ -167,10 +168,10 @@ public class OpravneniKZrProcessor implements TabProcessor {
     private void setOpravneniAgenta(OpravneniKUdajum opravneni, XSSFRow rowX, Agent entity,
                                     String identifikace, int colIndex, Cinnost cinnost) {
         if (Utils.isAno(rowX.getCell(colIndex))) {
-            OpravneniAgenta op = new OpravneniAgenta();
+            OpravneniAgenta op = Registry.get(OpravneniAgenta.class,
+                Vocabulary.getClassInstance(Vocabulary.OPRAVNENI_AGENTA,identifikace + "-" + opravneni.getKod()));
             op.setOpravneniKUdajum(opravneni);
             op.setAgent(entity);
-            op.setId(Vocabulary.getClassInstance(Vocabulary.OPRAVNENI_AGENTA,identifikace + "-" + opravneni.getKod()));
             cinnost.getOpravneniAgenta().add(op);
         }
     }
@@ -191,11 +192,10 @@ public class OpravneniKZrProcessor implements TabProcessor {
                                              TypAgenta entity, String identifikace, int colIndex,
                                              Cinnost cinnost) {
         if (Utils.isAno(rowX.getCell(colIndex))) {
-            OpravneniTypuAgenta op = new OpravneniTypuAgenta();
+            OpravneniTypuAgenta op = Registry.get(OpravneniTypuAgenta.class,
+                Vocabulary.getClassInstance(Vocabulary.OPRAVNENI_TYPU_AGENTA,identifikace + "-" + opravneni.getKod()));
             op.setOpravneniKUdajum(opravneni);
             op.setTypAgenta(entity);
-            op.setId(Vocabulary.getClassInstance(Vocabulary.OPRAVNENI_TYPU_AGENTA,identifikace + "/" + opravneni
-                .getKod()));
             cinnost.getOpravneniKategorieAgentu().add(op);
         }
     }
@@ -206,13 +206,13 @@ public class OpravneniKZrProcessor implements TabProcessor {
             final XSSFCell firstCell = r.getCell(0);
             if (firstCell.toString() != null && !firstCell.toString().isEmpty() && firstCell
                 .toString().matches("([0-9-]+).*")) {
-                o = new Objekt();
-                o.setKod(Utils.extract("([0-9-]+).*", firstCell.toString()).get(0));
-                o.setId(Vocabulary.getClassInstance(Vocabulary.OBJEKT,o.getKod()));
+                final String kod = Utils.extract("([0-9-]+).*", firstCell.toString()).get(0);
+                o = Registry.get(Objekt.class, Vocabulary.getClassInstance(Vocabulary.OBJEKT,kod));
+                o.setKod(kod);
             } else if (r.getCell(3).toString().toString().matches("([0-9-]+).*")) {
-                final Udaj udaj = new Udaj();
-                udaj.setKod(Utils.extract("([0-9-]+).*", r.getCell(3).toString()).get(0));
-                udaj.setId(Vocabulary.getClassInstance(Vocabulary.UDAJ,udaj.getKod()));
+                final String kod = Utils.extract("([0-9-]+).*", r.getCell(3).toString()).get(0);
+                final Udaj udaj = Registry.get(Udaj.class, Vocabulary.getClassInstance(Vocabulary.UDAJ,kod));
+                udaj.setKod(kod);
                 opravneni.getUdajeKeCteni().add(udaj);
             }
             rowNum = r.getRowNum();

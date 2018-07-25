@@ -4,6 +4,7 @@ import cz.gov.data.rpp.xls2rdf.TabProcessor;
 import cz.gov.data.rpp.xls2rdf.Vocabulary;
 import cz.gov.data.rpp.xls2rdf.model.Agenda;
 import cz.gov.data.rpp.xls2rdf.model.Cinnost;
+import cz.gov.data.rpp.xls2rdf.model.utils.Registry;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 
 import static cz.gov.data.rpp.xls2rdf.Vocabulary.DATA_BASE;
@@ -20,7 +21,12 @@ public class CinnostiProcessor implements TabProcessor {
         TabProcessor.processDynamicList(sheet, 0,
             "Činnosti konané za účelem výkonu veřejné moci v rámci agendy", 2, "^$")
                     .forEach((row) -> {
-                        final Cinnost cinnost = new Cinnost();
+                        final String kod = row.getCell(0).toString();
+                        final Cinnost cinnost = Registry.get(
+                            Cinnost.class,
+                            Vocabulary.getClassInstance(Vocabulary.CINNOST,
+                                kod + "-" + TabProcessor
+                            .formatDate(agenda.getPlatnostOd())));
                         cinnost.setKod(row.getCell(0).toString());
                         cinnost.setNazev(row.getCell(1).toString());
                         cinnost.setPopis(row.getCell(2).toString());
@@ -31,11 +37,6 @@ public class CinnostiProcessor implements TabProcessor {
                         if (!value.startsWith("Typ činnosti nevyplněn")) {
                             cinnost.setTypCinnosti(value);
                         }
-
-                        cinnost.setId(
-                            Vocabulary.getClassInstance(Vocabulary.CINNOST,cinnost.getKod() + "-" + TabProcessor
-                                .formatDate(agenda.getPlatnostOd())));
-
                         agenda.getCinnosti().add(cinnost);
                     });
     }

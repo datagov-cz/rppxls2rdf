@@ -6,6 +6,8 @@ import cz.gov.data.rpp.xls2rdf.Vocabulary;
 import cz.gov.data.rpp.xls2rdf.model.Agenda;
 import cz.gov.data.rpp.xls2rdf.model.Ais;
 import cz.gov.data.rpp.xls2rdf.model.PozadavekNaPristupKAgende;
+import cz.gov.data.rpp.xls2rdf.model.utils.Registry;
+import java.util.Date;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 
@@ -27,16 +29,15 @@ public class PristupKAgendamProcessor implements TabProcessor {
             final String kodAgendy = row.getCell(0).toString();
             if (!kodAgendy.isEmpty()) {
                 position = 0;
-                agenda2 = new Agenda();
-                agenda2.setKod(row.getCell(0).toString());
+                String kod = row.getCell(0).toString();
+                Date platnostOd = row.getCell(4).getDateCellValue();
+                agenda2 = Registry.get(Agenda.class,Vocabulary.getClassInstance(Vocabulary.AGENDA,kod + "-" + TabProcessor.formatDate(platnostOd)));
+                agenda2.setKod(kod);
                 agenda2.setNazev(row.getCell(1).toString());
-                agenda2.setPlatnostOd(row.getCell(4).getDateCellValue());
+                agenda2.setPlatnostOd(platnostOd);
                 agenda2.setPlatnostDo(row.getCell(5).toString());
-                agenda2.setId(Utils.getIdForAgenda(agenda2));
-                pozadavek = new PozadavekNaPristupKAgende();
+                pozadavek = Registry.get(PozadavekNaPristupKAgende.class, Vocabulary.getClassInstance(Vocabulary.POZADAVEK_NA_PRISTUP_K_AGENDE, agenda.getKod() + "-" + kod));
                 pozadavek.setAgendaPoskytujiciUdaje(agenda2);
-                pozadavek.setId(Vocabulary.getClassInstance(Vocabulary.POZADAVEK_NA_PRISTUP_K_AGENDE, agenda.getKod() + "-"
-                    + agenda2.getKod()));
                 agenda.getPozadavkyNaPristupKAgendam().add(pozadavek);
             } else {
                 if (position == 0) {
@@ -44,12 +45,11 @@ public class PristupKAgendamProcessor implements TabProcessor {
                     continue;
                 }
                 position++;
-
-                final Ais ais = new Ais();
-                ais.setKod((int) row.getCell(1).getNumericCellValue() + "");
+                String kod = (int) row.getCell(1).getNumericCellValue() + "";
+                final Ais ais = Registry.get(Ais.class, Vocabulary.getClassInstance(Vocabulary.AGENDOVY_INFORMACNI_SYSTEM, kod));
+                ais.setKod(kod);
                 ais.setNazev(row.getCell(2).toString());
                 ais.setSpravce(row.getCell(4).toString());
-                ais.setId(Vocabulary.getClassInstance(Vocabulary.AGENDOVY_INFORMACNI_SYSTEM,ais.getKod()));
                 pozadavek.getAisy().add(ais);
                 agenda.getPozadavkyNaPristupKAgendam().add(pozadavek);
             }

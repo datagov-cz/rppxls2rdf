@@ -3,6 +3,7 @@ package cz.gov.data.rpp.xls2rdf;
 import cz.gov.data.rpp.xls2rdf.model.Agenda;
 import cz.gov.data.rpp.xls2rdf.model.OstatniPravniPredpis;
 import cz.gov.data.rpp.xls2rdf.model.PravniPredpisZeSbirkyZakonu;
+import cz.gov.data.rpp.xls2rdf.model.utils.Registry;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -11,21 +12,15 @@ import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 
 public class Utils {
-
-    public static String getIdForAgenda(final Agenda agenda) {
-        return Vocabulary.getClassInstance(Vocabulary.AGENDA,agenda.getKod() + "-" + TabProcessor
-            .formatDate(agenda.getPlatnostOd()));
-    }
-
+    
     public static OstatniPravniPredpis createOstatniPravniPredpis(final XSSFRow row,
                                                                   final int iNazev) {
         return createOstatniPravniPredpis(row.getCell(iNazev).toString());
     }
 
     public static OstatniPravniPredpis createOstatniPravniPredpis(final String nazev) {
-        OstatniPravniPredpis result = new OstatniPravniPredpis();
+        OstatniPravniPredpis result = Registry.get(OstatniPravniPredpis.class,Vocabulary.getClassInstance(Vocabulary.OSTATNI_PRAVNI_PREDPIS,urify(nazev)));
         result.setNazev(nazev);
-        result.setId(Vocabulary.getClassInstance(Vocabulary.OSTATNI_PRAVNI_PREDPIS,urify(result.getNazev())));
         return result;
     }
 
@@ -62,27 +57,24 @@ public class Utils {
     public static PravniPredpisZeSbirkyZakonu createPravniPredpisZeSbirkyZakonu(
         final String cisloDirty, final double rokVydani, final String nazev, final String paragraf,
         final String odstavec, final String pismeno) {
-        PravniPredpisZeSbirkyZakonu pravniPredpis = new PravniPredpisZeSbirkyZakonu();
-        if (cisloDirty != null) {
-            pravniPredpis.setCislo(cisloDirty.replaceAll("\\s", "-"));
-        }
-        pravniPredpis.setRokVydani(((int) rokVydani) + "");
-        pravniPredpis.setNazev(nazev);
-        if (paragraf != null) {
-            pravniPredpis.setParagraf(paragraf.replaceAll("\\s", "-"));
-        }
-        if (odstavec != null) {
-            pravniPredpis.setOdstavec(odstavec.replaceAll("\\s", "-"));
-        }
-        if (pismeno != null) {
-            pravniPredpis.setPismeno(pismeno.replaceAll("\\s", "-"));
-        }
-        pravniPredpis.setId(
+        final String rv = ((int) rokVydani) + "";
+        final String cis = cisloDirty == null ? null : cisloDirty.replaceAll("\\s", "-");
+        final String par = paragraf == null ? null : paragraf.replaceAll("\\s", "-");
+        final String odst = odstavec == null ? null : odstavec.replaceAll("\\s", "-");
+        final String pis = pismeno == null ? null : pismeno.replaceAll("\\s", "-");
+
+        PravniPredpisZeSbirkyZakonu pravniPredpis = Registry.get(PravniPredpisZeSbirkyZakonu.class,
             Vocabulary.getClassInstance(Vocabulary.PRAVNI_PREDPIS_ZE_SBIRKY_ZAKONU,
-                pravniPredpis.getRokVydani() + "-" + pravniPredpis
-                .getCislo() + TabProcessor
-                .createHierarchicalIdentifier("-", pravniPredpis.getParagraf(),
-                    pravniPredpis.getOdstavec(), pravniPredpis.getPismeno())));
+                rv + "-" + cis + TabProcessor
+                    .createHierarchicalIdentifier("-", par,
+                        odst, pis)));
+
+        pravniPredpis.setCislo(cis);
+        pravniPredpis.setRokVydani(rv);
+        pravniPredpis.setNazev(nazev);
+        pravniPredpis.setParagraf(par);
+        pravniPredpis.setOdstavec(odst);
+        pravniPredpis.setPismeno(pis);
 
         return pravniPredpis;
     }

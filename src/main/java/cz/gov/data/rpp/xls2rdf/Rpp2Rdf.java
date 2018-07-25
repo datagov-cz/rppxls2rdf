@@ -4,6 +4,7 @@ import cz.cvut.kbss.jopa.model.EntityManager;
 import cz.cvut.kbss.jopa.model.JOPAPersistenceProperties;
 import cz.cvut.kbss.jopa.model.descriptors.EntityDescriptor;
 import cz.gov.data.rpp.xls2rdf.model.Agenda;
+import cz.gov.data.rpp.xls2rdf.model.utils.Registry;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -60,19 +61,17 @@ public class Rpp2Rdf {
      */
     private void transform(Stream<Path> rppXlsFiles) {
         final EntityManager em = PersistenceFactory.createEntityManager();
+        final Processor proc = new Processor();
         rppXlsFiles
             .filter(file -> !Files.isDirectory(file))
             .filter(file -> file.getFileName().toString().endsWith("xlsx")).forEach(f -> {
-            final Processor proc = new Processor();
             try (InputStream is = Files.newInputStream(f)) {
-                Agenda agenda = proc.process(is);
-
+                System.out.println(f.getFileName());
+                final Agenda agenda = proc.process(f.getFileName().toString(),is);
                 if (agenda.getPlatnostDo() != null && !agenda.getPlatnostDo().trim().equals("")) {
                     return;
                 }
-
                 fire(agenda);
-
                 LOG.info("Starting transaction for {} ... ", agenda.getKod());
                 em.getTransaction().begin();
                 LOG.info("Merging ...");
@@ -80,8 +79,6 @@ public class Rpp2Rdf {
                 LOG.info("Committing transaction ...");
                 em.getTransaction().commit();
                 LOG.info("Done.");
-
-
             } catch (IOException e) {
                 e.printStackTrace();
             }

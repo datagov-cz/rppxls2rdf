@@ -21,7 +21,8 @@ public class TestParseRole {
     @Before public void init() {
         final Processor p = new Processor();
         try {
-            agenda = p.process(getClass().getResourceAsStream("/A1029_01102016.xlsx"));
+            String fileName = "A1029_01102016.xlsx";
+            agenda = p.process(fileName,getClass().getResourceAsStream("/"+fileName));
         } catch (IOException e) {
             agenda = null;
             fail();

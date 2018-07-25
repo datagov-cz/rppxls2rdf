@@ -6,6 +6,7 @@ import cz.gov.data.rpp.xls2rdf.Vocabulary;
 import cz.gov.data.rpp.xls2rdf.model.Agenda;
 import cz.gov.data.rpp.xls2rdf.model.Ovm;
 import cz.gov.data.rpp.xls2rdf.model.PravniPredpis;
+import cz.gov.data.rpp.xls2rdf.model.utils.Registry;
 import java.util.stream.Collectors;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
@@ -26,7 +27,7 @@ public class DefiniceProcessor implements TabProcessor {
         agenda.setDatumVzniku(sheet.getRow(6).getCell(3).getDateCellValue());
         agenda.setDatumZaniku(sheet.getRow(7).getCell(3).toString());
 
-        agenda.setId(Utils.getIdForAgenda(agenda));
+//        agenda.setId(Utils.getIdForAgenda(agenda));
 
         // cycles while JOPA persisting
         //        processOhlasovatelAgendy(sheet, agenda);
@@ -39,8 +40,9 @@ public class DefiniceProcessor implements TabProcessor {
     }
 
     private void processOhlasovatelAgendy(final XSSFSheet sheet, final Agenda agenda) {
-        final Ovm ohlasovatel = new Ovm();
-        ohlasovatel.setIdentifikace(sheet.getRow(9).getCell(3).toString());
+        final String identifikace = sheet.getRow(9).getCell(3).toString();
+        final Ovm ohlasovatel = Registry.get(Ovm.class,Vocabulary.getClassInstance(Vocabulary.ORGAN_VEREJNE_MOCI,identifikace));
+        ohlasovatel.setIdentifikace(identifikace);
         ohlasovatel.setNazev(sheet.getRow(10).getCell(3).toString());
         ohlasovatel.setId(Vocabulary.getClassInstance(Vocabulary.ORGAN_VEREJNE_MOCI,ohlasovatel.getIdentifikace()));
         agenda.setOhlasovatel(ohlasovatel);
@@ -69,10 +71,8 @@ public class DefiniceProcessor implements TabProcessor {
 
     private void processPravniPredpisZeSbirkyZakonu(final XSSFSheet sheet, final Agenda agenda) {
         TabProcessor.processDynamicList(sheet, 0,
-            "Právní předpisy, na jejichž základě je agenda vykonávána – Právní předpisy ze Sbírky"
-            + " zákonů", 2,
-            "Právní předpisy, na jejichž základě je agenda vykonávána – Ostatní právní předpisy a"
-            + " jejich ustanovení").forEach((row) -> {
+            "Právní předpisy.*ze Sbírky zákonů", 2,
+            "Právní předpisy.*Ostatní.*").forEach((row) -> {
             final PravniPredpis ppzz = processPravniPredpisZeSbirkyZakonu(row, agenda);
             if (agenda.getPravniPredpisy().stream().map(p -> p.getId()).collect(
                 // kvuli 257	2012 v A1126
@@ -80,9 +80,10 @@ public class DefiniceProcessor implements TabProcessor {
                 // látek, které poškozují ozonovou vrstvu, a fluorovaných
                 // skleníkových plynů
                 Collectors.toList()).contains(ppzz.getId())) {
-                System.out.println("ERROR - duplicate PravniPredpis with ID " + ppzz.getId()
+                System.out.println("ERRORX - duplicate PravniPredpis with ID " + ppzz.getId()
                                    + ", skipping the new one");
             } else {
+                System.out.println("Adding " +ppzz.getId() +"  to " + agenda.getKod());
                 agenda.getPravniPredpisy().add(ppzz);
             }
         });

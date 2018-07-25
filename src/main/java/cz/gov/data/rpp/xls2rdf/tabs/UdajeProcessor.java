@@ -6,6 +6,7 @@ import cz.gov.data.rpp.xls2rdf.Vocabulary;
 import cz.gov.data.rpp.xls2rdf.model.Agenda;
 import cz.gov.data.rpp.xls2rdf.model.Objekt;
 import cz.gov.data.rpp.xls2rdf.model.Udaj;
+import cz.gov.data.rpp.xls2rdf.model.utils.Registry;
 import java.util.HashSet;
 import java.util.Set;
 import org.apache.poi.xssf.usermodel.XSSFRow;
@@ -67,13 +68,13 @@ public class UdajeProcessor implements TabProcessor {
     }
 
     private Udaj processUdaj(final XSSFRow row) {
-        final Udaj udaj = new Udaj();
-        udaj.setKod(row.getCell(1).toString());
+        final String kod = row.getCell(1).toString();
+        final Udaj udaj = Registry.get(Udaj.class,Vocabulary.getClassInstance(Vocabulary.UDAJ,kod));
+        udaj.setKod(kod);
         udaj.setNazev(row.getCell(2).toString());
         udaj.setPopis(row.getCell(4).toString());
         udaj.setTyp(row.getCell(5).toString());
         udaj.setVerejny(row.getCell(7).toString().equals("Ano"));
-        udaj.setId(Vocabulary.getClassInstance(Vocabulary.UDAJ,udaj.getKod()));
         return udaj;
     }
 
@@ -81,11 +82,10 @@ public class UdajeProcessor implements TabProcessor {
         final String kod = row.getCell(0).toString();
 
         if (!kod.equals("Žádná data nejsou k dispozici")) {
-            final Objekt objekt = new Objekt();
-            objekt.setKod(row.getCell(0).toString());
+            final Objekt objekt = Registry.get(Objekt.class,Vocabulary.getClassInstance(Vocabulary.OBJEKT,kod));
+            objekt.setKod(kod);
             objekt.setNazev(row.getCell(2).toString());
             objekt.setPopis(row.getCell(4).toString());
-            objekt.setId(Vocabulary.getClassInstance(Vocabulary.OBJEKT,objekt.getKod()));
             return objekt;
         }
         return null;

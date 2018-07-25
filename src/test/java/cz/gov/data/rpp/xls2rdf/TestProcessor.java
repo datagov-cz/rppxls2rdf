@@ -43,7 +43,7 @@ import org.junit.runners.Parameterized;
         if (directoryListing != null) {
             for (File child : directoryListing) {
                 try {
-                    p.process(new FileInputStream(child));
+                    p.process(child.getName(),new FileInputStream(child));
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -55,7 +55,7 @@ import org.junit.runners.Parameterized;
         final Processor p = new Processor();
 
         try {
-            Agenda a = p.process(
+            Agenda a = p.process(agendaFile,
                 getClass().getResourceAsStream("/agendas/20170817-agendas/" + agendaFile));
             Assert.assertEquals(expectedNumberOfObjectsInAgenda, a.getObjekty().size());
         } catch (IOException e) {

@@ -19,7 +19,8 @@ public class TestParseUdaje {
     @Before public void init() {
         final Processor p = new Processor();
         try {
-            agenda = p.process(getClass().getResourceAsStream("/A104_31012012.xlsx"));
+            String fileName = "A104_31012012.xlsx";
+            agenda = p.process(fileName,getClass().getResourceAsStream("/"+fileName));
         } catch (IOException e) {
             agenda = null;
             fail();
